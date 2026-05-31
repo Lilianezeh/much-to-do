@@ -1,11 +1,14 @@
 # ─── Stage 1: Builder ───────────────────────────────────────────
-FROM golang:1.21-alpine AS builder
+FROM golang:1.23-alpine AS builder
 
 # Install build dependencies
 RUN apk add --no-cache git ca-certificates tzdata
 
 # Set working directory
 WORKDIR /app
+
+# Allow newer Go toolchain
+ENV GOTOOLCHAIN=auto
 
 # Copy go mod files first for better caching
 COPY Server/MuchToDo/go.mod Server/MuchToDo/go.sum ./
@@ -35,6 +38,7 @@ WORKDIR /app
 
 # Copy binary from builder
 COPY --from=builder /app/muchtodo .
+COPY .env .
 
 # Set ownership
 RUN chown -R appuser:appgroup /app

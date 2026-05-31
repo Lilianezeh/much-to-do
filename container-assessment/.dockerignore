@@ -6,6 +6,6 @@ kubernetes/
 scripts/
 **/*_test.go
 **/*.test
-.env
 .env.*
+!.env
 !.env.example
