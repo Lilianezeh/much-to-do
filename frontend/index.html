@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>MuchToDo - StartTech</title>
+  <style>
+    body { font-family: Arial; text-align: center; padding: 50px; background: #f0f4f8; }
+    .box { background: white; padding: 40px; border-radius: 10px; display: inline-block; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+    h1 { color: #2c3e50; }
+    .status { color: #27ae60; font-size: 18px; }
+    button { background: #3498db; color: white; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer; margin: 5px; }
+    pre { text-align: left; background: #f8f9fa; padding: 10px; border-radius: 5px; }
+  </style>
+</head>
+<body>
+  <div class="box">
+    <h1>🚀 MuchToDo API</h1>
+    <p>StartTech Application - Month 3 Assessment</p>
+    <div id="status" class="status">Checking API...</div>
+    <br>
+    <button onclick="checkHealth()">Check Health</button>
+    <button onclick="checkPing()">Ping API</button>
+    <button onclick="checkRoot()">Welcome</button>
+    <div id="result"></div>
+  </div>
+  <script>
+    const API = 'http://starttech-alb-9595592.us-east-1.elb.amazonaws.com';
+
+    async function fetchAPI(path) {
+      try {
+        const res = await fetch(API + path);
+        const data = await res.json();
+        document.getElementById('result').innerHTML =
+          '<pre>' + JSON.stringify(data, null, 2) + '</pre>';
+        document.getElementById('status').innerHTML = '✅ API is Online';
+      } catch(e) {
+        document.getElementById('status').innerHTML = '❌ API Error: ' + e.message;
+      }
+    }
+
+    function checkHealth() { fetchAPI('/health'); }
+    function checkPing() { fetchAPI('/ping'); }
+    function checkRoot() { fetchAPI('/'); }
+
+    checkHealth();
+  </script>
+</body>
+</html>
