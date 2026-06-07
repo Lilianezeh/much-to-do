@@ -2,13 +2,12 @@ FROM golang:1.23-alpine AS builder
 
 WORKDIR /app
 
-# copy EVERYTHING FIRST (removes go.mod issues)
-COPY Server/MuchToDo/ .
+COPY . .
 
 RUN go mod download
 
 RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build \
-  -o muchtodo ./cmd
+    -o muchtodo ./cmd
 
 FROM alpine:3.19
 
