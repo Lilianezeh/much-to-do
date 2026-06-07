@@ -36,8 +36,7 @@ jobs:
       - name: Security Scan
         uses: securego/gosec@master
         with:
-          args: '-no-fail ./...'
-        working-directory: Server/MuchToDo
+          args: '-no-fail Server/MuchToDo/...'
         continue-on-error: true
 
   build-and-push:
