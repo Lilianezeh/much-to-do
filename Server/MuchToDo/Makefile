@@ -1,5 +1,7 @@
+ifneq (,$(wildcard .env))
 include .env
 export $(shell sed 's/=.*//' .env)
+endif
 
 run: generate-docs
 	go run ./cmd/api/main.go
