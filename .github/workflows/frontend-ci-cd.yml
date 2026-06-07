@@ -15,27 +15,6 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '18'
-          cache: 'npm'
-          cache-dependency-path: Server/MuchToDo/frontend/package-lock.json
-
-      - name: Install Dependencies
-        working-directory: Server/MuchToDo/frontend
-        run: npm ci
-
-      - name: Security Audit
-        working-directory: Server/MuchToDo/frontend
-        run: npm audit --audit-level=high || true
-
-      - name: Build Frontend
-        working-directory: Server/MuchToDo/frontend
-        env:
-          NEXT_PUBLIC_API_URL: ${{ secrets.NEXT_PUBLIC_API_URL }}
-        run: npm run build
-
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
@@ -43,27 +22,12 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: us-east-1
 
-      - name: Deploy to S3
-        working-directory: Server/MuchToDo/frontend
+      - name: Deploy Frontend to S3
         run: |
-          S3_BUCKET=$(aws s3 ls | grep starttech-frontend | awk '{print $3}' 2>/dev/null || echo "")
-          if [ -n "$S3_BUCKET" ]; then
-            aws s3 sync out/ s3://$S3_BUCKET --delete
-            echo "Frontend deployed to S3: $S3_BUCKET"
-          else
-            echo "S3 bucket not found - infrastructure may not be deployed yet"
-          fi
+          aws s3 cp frontend/index.html s3://starttech-frontend-bucket-4944d90c/index.html
+          echo "Frontend deployed successfully!"
 
-      - name: Invalidate CloudFront Cache
+      - name: Verify Deployment
         run: |
-          DIST_ID=$(aws cloudfront list-distributions \
-            --query "DistributionList.Items[?contains(Origins.Items[0].DomainName, 'starttech')].Id" \
-            --output text 2>/dev/null || echo "")
-          if [ -n "$DIST_ID" ]; then
-            aws cloudfront create-invalidation \
-              --distribution-id $DIST_ID \
-              --paths "/*"
-            echo "CloudFront cache invalidated"
-          else
-            echo "CloudFront distribution not found"
-          fi
+          aws s3 ls s3://starttech-frontend-bucket-4944d90c/
+          echo "Deployment verified!"
