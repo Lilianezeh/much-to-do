@@ -73,4 +73,4 @@ docker compose up -d
 ## Health Check
 ```bash
 bash scripts/health-check.sh
-```
+```trigger workflow
