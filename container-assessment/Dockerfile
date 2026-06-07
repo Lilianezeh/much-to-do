@@ -38,7 +38,7 @@ WORKDIR /app
 
 # Copy binary from builder
 COPY --from=builder /app/muchtodo .
-COPY .env .
+# .env removed for CI/CD compatibility
 
 # Set ownership
 RUN chown -R appuser:appgroup /app
