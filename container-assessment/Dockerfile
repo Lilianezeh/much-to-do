@@ -1,23 +1,29 @@
 # ─── Stage 1: Builder ───────────────────────────────────────────
 FROM golang:1.23-alpine AS builder
 
-# Install build dependencies
-RUN apk add --no-cache git ca-certificates tzdata
-
-# Set working directory
 WORKDIR /app
 
-# Allow newer Go toolchain
-ENV GOTOOLCHAIN=auto
+# copy module files FIRST (important)
+COPY go.mod go.sum ./
 
-# Copy go mod files first for better caching
-COPY Server/MuchToDo/go.mod Server/MuchToDo/go.sum ./
-
-# Download dependencies
 RUN go mod download
 
-# Copy the rest of the source code
-COPY Server/MuchToDo/ .
+# copy full source
+COPY . .
+
+# build binary
+RUN go build -o main ./cmd
+
+# runtime stage
+FROM alpine:latest
+
+WORKDIR /root/
+
+COPY --from=builder /app/main .
+
+EXPOSE 8080
+
+CMD ["./main"]
 
 # Build the binary
 RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build \
