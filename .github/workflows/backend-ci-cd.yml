@@ -64,19 +64,22 @@ jobs:
           aws ecr describe-repositories --repository-names $ECR_REPOSITORY \
             || aws ecr create-repository --repository-name $ECR_REPOSITORY
 
-      - name: Build and Push Docker Image
-        id: build-image
-        env:
-          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-          IMAGE_TAG: ${{ github.sha }}
-        run: |
-          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG \
-            -f container-assessment/Dockerfile .
-          docker tag $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG \
-            $ECR_REGISTRY/$ECR_REPOSITORY:latest
-          docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
-          docker push $ECR_REGISTRY/$ECR_REPOSITORY:latest
-          echo "image-uri=$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG" >> $GITHUB_OUTPUT
+- name: Build and Push Docker Image
+  id: build-image
+  env:
+    ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+    IMAGE_TAG: ${{ github.sha }}
+  run: |
+    docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG \
+      -f Server/MuchToDo/Dockerfile Server/MuchToDo
+
+    docker tag $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG \
+      $ECR_REGISTRY/$ECR_REPOSITORY:latest
+
+    docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+    docker push $ECR_REGISTRY/$ECR_REPOSITORY:latest
+
+    echo "image-uri=$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG" >> $GITHUB_OUTPUT
 
       - name: Scan Docker Image
         uses: aquasecurity/trivy-action@master
