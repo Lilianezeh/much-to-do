@@ -33,10 +33,9 @@ jobs:
           echo "Tests passed"
 
       - name: Security scan
-        working-directory: Server/MuchToDo
         run: |
           go install github.com/securego/gosec/v2/cmd/gosec@latest
-          gosec -no-fail ./... || true
+          cd Server/MuchToDo && gosec -no-fail ./... || true
         continue-on-error: true
 
   build-and-push:
