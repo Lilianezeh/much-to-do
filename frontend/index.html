@@ -1,47 +1,353 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>MuchToDo - StartTech</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MuchToDo - Task Management App</title>
   <style>
-    body { font-family: Arial; text-align: center; padding: 50px; background: #f0f4f8; }
-    .box { background: white; padding: 40px; border-radius: 10px; display: inline-block; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
-    h1 { color: #2c3e50; }
-    .status { color: #27ae60; font-size: 18px; }
-    button { background: #3498db; color: white; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer; margin: 5px; }
-    pre { text-align: left; background: #f8f9fa; padding: 10px; border-radius: 5px; }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #f0f2f5; }
+    
+    /* Navbar */
+    nav { background: #1a73e8; padding: 0 24px; height: 64px; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 2px 8px rgba(0,0,0,0.2); }
+    nav .logo { color: white; font-size: 24px; font-weight: 700; }
+    nav .nav-links a { color: white; text-decoration: none; margin-left: 24px; font-size: 15px; opacity: 0.9; }
+    nav .nav-links a:hover { opacity: 1; }
+    .status-badge { background: #34a853; color: white; padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 600; }
+
+    /* Hero */
+    .hero { background: linear-gradient(135deg, #1a73e8 0%, #0d47a1 100%); color: white; padding: 80px 24px; text-align: center; }
+    .hero h1 { font-size: 48px; font-weight: 700; margin-bottom: 16px; }
+    .hero p { font-size: 20px; opacity: 0.9; margin-bottom: 32px; }
+    .hero-buttons { display: flex; gap: 16px; justify-content: center; }
+    .btn { padding: 12px 32px; border-radius: 8px; font-size: 16px; font-weight: 600; cursor: pointer; border: none; transition: all 0.2s; }
+    .btn-primary { background: white; color: #1a73e8; }
+    .btn-primary:hover { background: #f8f9fa; transform: translateY(-2px); }
+    .btn-secondary { background: transparent; color: white; border: 2px solid white; }
+    .btn-secondary:hover { background: rgba(255,255,255,0.1); }
+
+    /* Container */
+    .container { max-width: 1200px; margin: 0 auto; padding: 0 24px; }
+
+    /* API Status */
+    .api-status { background: white; border-radius: 12px; padding: 24px; margin: 32px auto; max-width: 1200px; margin-left: auto; margin-right: auto; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+    .api-status h2 { font-size: 20px; margin-bottom: 16px; color: #333; }
+    .status-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; }
+    .status-card { padding: 16px; border-radius: 8px; border-left: 4px solid #1a73e8; background: #f8f9fa; }
+    .status-card .label { font-size: 12px; color: #666; text-transform: uppercase; letter-spacing: 1px; }
+    .status-card .value { font-size: 18px; font-weight: 600; color: #333; margin-top: 4px; }
+    .status-card .value.ok { color: #34a853; }
+    .status-card .value.error { color: #ea4335; }
+
+    /* Features */
+    .features { padding: 48px 24px; }
+    .features h2 { text-align: center; font-size: 32px; margin-bottom: 32px; color: #333; }
+    .features-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 24px; max-width: 1200px; margin: 0 auto; }
+    .feature-card { background: white; border-radius: 12px; padding: 24px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); transition: transform 0.2s; }
+    .feature-card:hover { transform: translateY(-4px); }
+    .feature-icon { font-size: 40px; margin-bottom: 16px; }
+    .feature-card h3 { font-size: 18px; margin-bottom: 8px; color: #333; }
+    .feature-card p { color: #666; line-height: 1.6; }
+
+    /* API Tester */
+    .api-tester { background: white; border-radius: 12px; padding: 32px; margin: 0 24px 48px; max-width: 1200px; margin-left: auto; margin-right: auto; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+    .api-tester h2 { font-size: 24px; margin-bottom: 24px; color: #333; }
+    .endpoint-buttons { display: flex; flex-wrap: wrap; gap: 12px; margin-bottom: 24px; }
+    .endpoint-btn { padding: 10px 20px; border-radius: 8px; border: 1px solid #1a73e8; background: white; color: #1a73e8; cursor: pointer; font-size: 14px; font-weight: 500; transition: all 0.2s; }
+    .endpoint-btn:hover { background: #1a73e8; color: white; }
+    .response-box { background: #1e1e1e; border-radius: 8px; padding: 20px; color: #d4d4d4; font-family: 'Courier New', monospace; font-size: 14px; min-height: 120px; white-space: pre-wrap; overflow-x: auto; }
+
+    /* Auth Section */
+    .auth-section { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin: 0 24px 48px; max-width: 1200px; margin-left: auto; margin-right: auto; }
+    .auth-card { background: white; border-radius: 12px; padding: 32px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+    .auth-card h2 { font-size: 24px; margin-bottom: 24px; color: #333; }
+    .form-group { margin-bottom: 16px; }
+    .form-group label { display: block; font-size: 14px; font-weight: 500; color: #555; margin-bottom: 6px; }
+    .form-group input { width: 100%; padding: 10px 14px; border: 1px solid #ddd; border-radius: 8px; font-size: 15px; outline: none; transition: border 0.2s; }
+    .form-group input:focus { border-color: #1a73e8; }
+    .form-submit { width: 100%; padding: 12px; background: #1a73e8; color: white; border: none; border-radius: 8px; font-size: 16px; font-weight: 600; cursor: pointer; transition: background 0.2s; }
+    .form-submit:hover { background: #1557b0; }
+    .form-message { margin-top: 12px; padding: 10px; border-radius: 6px; font-size: 14px; }
+    .form-message.success { background: #e6f4ea; color: #34a853; }
+    .form-message.error { background: #fce8e6; color: #ea4335; }
+
+    /* Footer */
+    footer { background: #333; color: white; text-align: center; padding: 24px; }
+    footer p { opacity: 0.7; font-size: 14px; }
+
+    @media (max-width: 768px) {
+      .hero h1 { font-size: 32px; }
+      .auth-section { grid-template-columns: 1fr; }
+      .hero-buttons { flex-direction: column; align-items: center; }
+    }
   </style>
 </head>
 <body>
-  <div class="box">
-    <h1>🚀 MuchToDo API</h1>
-    <p>StartTech Application - Month 3 Assessment</p>
-    <div id="status" class="status">Checking API...</div>
-    <br>
-    <button onclick="checkHealth()">Check Health</button>
-    <button onclick="checkPing()">Ping API</button>
-    <button onclick="checkRoot()">Welcome</button>
-    <div id="result"></div>
+
+  <!-- Navbar -->
+  <nav>
+    <div class="logo">✅ MuchToDo</div>
+    <div class="nav-links">
+      <a href="#features">Features</a>
+      <a href="#api">API</a>
+      <a href="#auth">Login</a>
+      <span class="status-badge" id="nav-status">Checking...</span>
+    </div>
+  </nav>
+
+  <!-- Hero -->
+  <div class="hero">
+    <h1>Manage Your Tasks</h1>
+    <p>A powerful task management API built with Golang, deployed on AWS</p>
+    <div class="hero-buttons">
+      <button class="btn btn-primary" onclick="document.getElementById('auth').scrollIntoView()">Get Started</button>
+      <button class="btn btn-secondary" onclick="document.getElementById('api').scrollIntoView()">View API</button>
+    </div>
   </div>
+
+  <!-- API Status -->
+  <div style="max-width:1200px;margin:32px auto;padding:0 24px;">
+    <div class="api-status">
+      <h2>🔌 Live API Status</h2>
+      <div class="status-grid">
+        <div class="status-card">
+          <div class="label">API Health</div>
+          <div class="value" id="health-status">Loading...</div>
+        </div>
+        <div class="status-card">
+          <div class="label">Database</div>
+          <div class="value" id="db-status">Loading...</div>
+        </div>
+        <div class="status-card">
+          <div class="label">Cache</div>
+          <div class="value" id="cache-status">Loading...</div>
+        </div>
+        <div class="status-card">
+          <div class="label">API Response</div>
+          <div class="value" id="ping-status">Loading...</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Features -->
+  <div class="features" id="features">
+    <h2>Features</h2>
+    <div class="features-grid">
+      <div class="feature-card">
+        <div class="feature-icon">🔐</div>
+        <h3>JWT Authentication</h3>
+        <p>Secure user authentication with JSON Web Tokens and bcrypt password hashing.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">📝</div>
+        <h3>Todo Management</h3>
+        <p>Full CRUD operations for managing your tasks and todos efficiently.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">🚀</div>
+        <h3>High Performance</h3>
+        <p>Built with Golang and Gin framework for blazing fast API responses.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">☁️</div>
+        <h3>Cloud Native</h3>
+        <p>Deployed on AWS EC2 with Auto Scaling, ALB, and CloudWatch monitoring.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">🗄️</div>
+        <h3>MongoDB Atlas</h3>
+        <p>Data persistence with MongoDB Atlas for reliable cloud database storage.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">🔄</div>
+        <h3>CI/CD Pipeline</h3>
+        <p>Automated deployments via GitHub Actions with Docker and ECR integration.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- API Tester -->
+  <div style="max-width:1200px;margin:0 auto 48px;padding:0 24px;" id="api">
+    <div class="api-tester">
+      <h2>🧪 API Explorer</h2>
+      <p style="color:#666;margin-bottom:20px;">Test the live API endpoints directly from your browser</p>
+      <div class="endpoint-buttons">
+        <button class="endpoint-btn" onclick="testEndpoint('/health')">GET /health</button>
+        <button class="endpoint-btn" onclick="testEndpoint('/ping')">GET /ping</button>
+        <button class="endpoint-btn" onclick="testEndpoint('/')">GET /</button>
+        <button class="endpoint-btn" onclick="testEndpoint('/api/books')">GET /api/books</button>
+      </div>
+      <div class="response-box" id="response-box">// Click an endpoint button to test the API...</div>
+    </div>
+  </div>
+
+  <!-- Auth Section -->
+  <div class="auth-section" id="auth" style="max-width:1200px;margin:0 auto 48px;padding:0 24px;display:grid;grid-template-columns:1fr 1fr;gap:24px;">
+
+    <!-- Register -->
+    <div class="auth-card">
+      <h2>📝 Register</h2>
+      <div class="form-group">
+        <label>Name</label>
+        <input type="text" id="reg-name" placeholder="John Doe">
+      </div>
+      <div class="form-group">
+        <label>Email</label>
+        <input type="email" id="reg-email" placeholder="john@example.com">
+      </div>
+      <div class="form-group">
+        <label>Username</label>
+        <input type="text" id="reg-username" placeholder="johndoe">
+      </div>
+      <div class="form-group">
+        <label>Password</label>
+        <input type="password" id="reg-password" placeholder="••••••••">
+      </div>
+      <button class="form-submit" onclick="register()">Create Account</button>
+      <div id="reg-message"></div>
+    </div>
+
+    <!-- Login -->
+    <div class="auth-card">
+      <h2>🔐 Login</h2>
+      <div class="form-group">
+        <label>Email</label>
+        <input type="email" id="login-email" placeholder="john@example.com">
+      </div>
+      <div class="form-group">
+        <label>Password</label>
+        <input type="password" id="login-password" placeholder="••••••••">
+      </div>
+      <button class="form-submit" onclick="login()">Sign In</button>
+      <div id="login-message"></div>
+      <div id="token-display" style="margin-top:16px;display:none;">
+        <div style="background:#e8f5e9;padding:12px;border-radius:8px;">
+          <p style="font-size:12px;color:#2e7d32;font-weight:600;">✅ LOGGED IN - JWT Token:</p>
+          <p id="token-value" style="font-size:11px;color:#333;word-break:break-all;margin-top:4px;"></p>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Footer -->
+  <footer>
+    <p>MuchToDo API — StartTech Assessment | Deployed on AWS S3 + CloudFront | Backend on EC2 Auto Scaling</p>
+    <p style="margin-top:8px;">API: <a href="http://starttech-alb-9595592.us-east-1.elb.amazonaws.com" style="color:#64b5f6;">starttech-alb-9595592.us-east-1.elb.amazonaws.com</a></p>
+  </footer>
+
   <script>
     const API = 'http://starttech-alb-9595592.us-east-1.elb.amazonaws.com';
 
-    async function fetchAPI(path) {
+    // Check API status on load
+    async function checkStatus() {
       try {
-        const res = await fetch(API + path);
+        const res = await fetch(API + '/health');
         const data = await res.json();
-        document.getElementById('result').innerHTML =
-          '<pre>' + JSON.stringify(data, null, 2) + '</pre>';
-        document.getElementById('status').innerHTML = '✅ API is Online';
+
+        document.getElementById('health-status').textContent = '✅ Online';
+        document.getElementById('health-status').className = 'value ok';
+        document.getElementById('db-status').textContent = data.database === 'ok' ? '✅ Connected' : '❌ Error';
+        document.getElementById('db-status').className = 'value ' + (data.database === 'ok' ? 'ok' : 'error');
+        document.getElementById('cache-status').textContent = data.cache === 'ok' ? '✅ Active' : '⚠️ Disabled';
+        document.getElementById('cache-status').className = 'value ok';
+        document.getElementById('nav-status').textContent = '● Live';
+        document.getElementById('nav-status').style.background = '#34a853';
       } catch(e) {
-        document.getElementById('status').innerHTML = '❌ API Error: ' + e.message;
+        document.getElementById('health-status').textContent = '❌ Offline';
+        document.getElementById('health-status').className = 'value error';
+        document.getElementById('nav-status').textContent = '● Offline';
+        document.getElementById('nav-status').style.background = '#ea4335';
+      }
+
+      try {
+        const res = await fetch(API + '/ping');
+        const data = await res.json();
+        document.getElementById('ping-status').textContent = '✅ ' + data.message;
+        document.getElementById('ping-status').className = 'value ok';
+      } catch(e) {
+        document.getElementById('ping-status').textContent = '❌ No response';
+        document.getElementById('ping-status').className = 'value error';
       }
     }
 
-    function checkHealth() { fetchAPI('/health'); }
-    function checkPing() { fetchAPI('/ping'); }
-    function checkRoot() { fetchAPI('/'); }
+    // Test API endpoint
+    async function testEndpoint(path) {
+      document.getElementById('response-box').textContent = '// Loading...';
+      try {
+        const res = await fetch(API + path);
+        const data = await res.json();
+        document.getElementById('response-box').textContent =
+          '// GET ' + path + '\n// Status: ' + res.status + ' ' + res.statusText + '\n\n' +
+          JSON.stringify(data, null, 2);
+      } catch(e) {
+        document.getElementById('response-box').textContent =
+          '// GET ' + path + '\n// Error: ' + e.message;
+      }
+    }
 
-    checkHealth();
+    // Register
+    async function register() {
+      const name = document.getElementById('reg-name').value;
+      const email = document.getElementById('reg-email').value;
+      const username = document.getElementById('reg-username').value;
+      const password = document.getElementById('reg-password').value;
+      const msg = document.getElementById('reg-message');
+
+      try {
+        const res = await fetch(API + '/api/users/register', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name, email, username, password })
+        });
+        const data = await res.json();
+        if (res.ok) {
+          msg.className = 'form-message success';
+          msg.textContent = '✅ ' + (data.message || 'Registration successful!');
+        } else {
+          msg.className = 'form-message error';
+          msg.textContent = '❌ ' + (data.message || data.error || 'Registration failed');
+        }
+      } catch(e) {
+        msg.className = 'form-message error';
+        msg.textContent = '❌ Error: ' + e.message;
+      }
+    }
+
+    // Login
+    async function login() {
+      const email = document.getElementById('login-email').value;
+      const password = document.getElementById('login-password').value;
+      const msg = document.getElementById('login-message');
+
+      try {
+        const res = await fetch(API + '/api/users/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, password })
+        });
+        const data = await res.json();
+        if (res.ok && data.token) {
+          msg.className = 'form-message success';
+          msg.textContent = '✅ Login successful!';
+          document.getElementById('token-display').style.display = 'block';
+          document.getElementById('token-value').textContent = data.token;
+          localStorage.setItem('token', data.token);
+        } else {
+          msg.className = 'form-message error';
+          msg.textContent = '❌ ' + (data.message || data.error || 'Login failed');
+        }
+      } catch(e) {
+        msg.className = 'form-message error';
+        msg.textContent = '❌ Error: ' + e.message;
+      }
+    }
+
+    // Initialize
+    checkStatus();
+    setInterval(checkStatus, 30000);
   </script>
+
 </body>
 </html>
